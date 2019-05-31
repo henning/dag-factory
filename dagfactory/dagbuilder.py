@@ -3,6 +3,7 @@ from typing import Dict, Any, List, Union, Callable
 
 from airflow import DAG, configuration
 from airflow.models import BaseOperator
+from airflow.operators.python_operator import PythonOperator
 from airflow.utils.module_loading import import_string
 
 from dagfactory import utils
@@ -54,6 +55,12 @@ class DagBuilder(object):
             operator_obj: Callable[..., BaseOperator] = import_string(operator)
         except Exception as e:
             raise Exception(f"Failed to import operator: {operator}. err: {e}")
+        # if we have a python operator, we need to replace the given string with 
+        # the callable it refers to
+        if type(operator_obj) == PythonOperator:
+            callable_name = task_params['python_callable']
+            callable = import_string(callable_name)
+            task_params['python_callable'] = callable
         try:
             task: BaseOperator = operator_obj(**task_params)
         except Exception as e:
