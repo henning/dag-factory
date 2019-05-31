@@ -57,7 +57,8 @@ class DagBuilder(object):
             raise Exception(f"Failed to import operator: {operator}. err: {e}")
         # if we have a python operator, we need to replace the given string with 
         # the callable it refers to
-        if type(operator_obj) == PythonOperator:
+        if operator_obj == PythonOperator:
+            print('PythonOperator detected - insert callable for string')
             callable_name = task_params['python_callable']
             callable = import_string(callable_name)
             task_params['python_callable'] = callable
